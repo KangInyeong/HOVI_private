@@ -184,7 +184,7 @@ public class EyeActivity extends AppCompatActivity implements TextToSpeech.OnIni
             @Override
             public void run()
             {
-                Toast.makeText(EyeActivity.this, "오른쪽눈10번감았어유!!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EyeActivity.this, "오른쪽눈감았어!!", Toast.LENGTH_SHORT).show();
             }
         }, 0);
     }
@@ -197,7 +197,7 @@ public class EyeActivity extends AppCompatActivity implements TextToSpeech.OnIni
             @Override
             public void run()
             {
-                Toast.makeText(EyeActivity.this, "왼쪽눈10번감았어유!!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EyeActivity.this, "왼쪽눈감았어!!", Toast.LENGTH_SHORT).show();
             }
         }, 0);
     }
@@ -476,7 +476,7 @@ public class EyeActivity extends AppCompatActivity implements TextToSpeech.OnIni
         mCameraSource = new CameraSource.Builder(context, detector)
                 .setFacing(facing)
                 .setRequestedPreviewSize(320, 240)
-                .setRequestedFps(60.0f)
+                .setRequestedFps(10.0f)
                 .setAutoFocusEnabled(true)
                 .build();
     }
@@ -507,5 +507,3 @@ public class EyeActivity extends AppCompatActivity implements TextToSpeech.OnIni
 
 
 }
-
-
