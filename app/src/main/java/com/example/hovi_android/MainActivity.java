@@ -2,6 +2,8 @@ package com.example.hovi_android;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -24,6 +26,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
+    //todo 서버와 데이터 삭제 후 재로딩 로직
+
     // Used to load the 'hovi_android' library on application startup.
     static {
         System.loadLibrary("hovi_android");
@@ -33,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     Retrofit retrofit;
     RetrofitAPI retrofitAPI;
+    String save_user;
     TextView txt_action1, txt_action2;
 
     @Override
@@ -42,16 +47,18 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Example of a call to a native method
-//        TextView tv = binding.sampleText;
-//        tv.setText(stringFromJNI());
+
+        //앱을 실행해서 처음에 유저 정보를 확인한다.
+        // 유저가 새로운 유저라면 showDialog 호출 후 유저 정보를 서버로 보낸 뒤에 startApp(유저정보), 기존 유저라면 startApp(유저정보)을 호출한다.
+        // startApp을 하면, 유저정보를 사용해서 getAction을 호출하여 서버에 저장된 액션들을 반환한다.
+
+
+        Button setting_btn = binding.btnSetting;
 
         Button check_btn = binding.checkBtn;
         Button revise_btn = binding.reviseBtn;
         txt_action1 = binding.txtAction1;
         txt_action2 = binding.txtAction2;
-
-        Button remove_btn = binding.removeBtn;
 
         retrofit = new Retrofit.Builder()
                 .baseUrl("http://15.164.218.200:8080/")
@@ -59,27 +66,37 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         retrofitAPI = retrofit.create(RetrofitAPI.class);
 
-        SharedPreferences sharedPreferences= getSharedPreferences("user", MODE_PRIVATE);
-        String save_user = sharedPreferences.getString("userId","");
-        if(save_user == null || save_user == ""){
+        SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
+        save_user = sharedPreferences.getString("userId", "");
+
+        SharedPreferences actionSP = getSharedPreferences("action", MODE_PRIVATE);
+        txt_action1.setText(actionSP.getString("action1","Water Please"));
+        txt_action2.setText(actionSP.getString("action2","Hungry"));
+
+        if (save_user == null || save_user == "") { //처음 접속한 유저
 
             String user_id = getuniqueid(); //생성
-            SharedPreferences.Editor editor= sharedPreferences.edit(); 
+            SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString("userId", user_id);
             editor.commit();
             Toast.makeText(this, "Welcome!", Toast.LENGTH_SHORT).show();
+            showDiaglog(user_id);
 
-            User user = new User();
-            startJoin(user, user_id);
-            getAction(user_id);
-
-        }else{
-            User user = new User();
-            startJoin(user, save_user);
+        } else { //기존 유저
             getAction(save_user);
         }
 
-        check_btn.setOnClickListener(new View.OnClickListener(){
+        //Click SETTING button
+        setting_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, SettingActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        //Click CHECK button
+        check_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, EyeActivity.class);
@@ -87,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Click REVISE button
         revise_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -95,28 +113,40 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        remove_btn.setOnClickListener(new View.OnClickListener() {
+    }
+
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        getAction(save_user);
+//    }
+
+    private void showDiaglog(String uid) {
+
+        //Dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+        builder.setTitle("Welcome").setMessage("If you want to change expressions, click REVISE button");
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                SharedPreferences.Editor prefs = getSharedPreferences("user", MODE_PRIVATE).edit();
-                prefs.remove("userId");
-                prefs.commit();
-                Toast.makeText(getBaseContext(), "Remove data", Toast.LENGTH_SHORT).show();
+            public void onClick(DialogInterface dialog, int id) {
+                startJoin(uid);
+                getAction(uid);
             }
         });
 
-
-
-
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
 
-    private String getuniqueid(){
+    private String getuniqueid() {
         String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
         return android_id;
     }
 
-    private void startJoin(User user, String user_id){
+    private void startJoin(String user_id) {
         retrofitAPI.checkData(user_id).enqueue(new Callback<Check>() {
             @Override
             public void onResponse(Call<Check> call, Response<Check> response) {
@@ -124,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                     Check check = response.body();
                     if (check.getdata() == true) {
                         Log.d("데이터있음", "성공");
-                    } else{
+                    } else {
                         Log.d("데이터없음", user_id);
                         setUserInfo(user_id);
                     }
@@ -139,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setUserInfo(String user_id){
+    private void setUserInfo(String user_id) {
         retrofitAPI.setUser(user_id).enqueue(new Callback<User>() {
 
             @Override
@@ -151,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("set사용자", user.toString());
                     Log.d("set사용자1", status.toString());
                 }
-                Log.d("set사용자 실패",  response.body().toString());
+                Log.d("set사용자 실패", response.body().toString());
             }
 
             @Override
@@ -162,10 +192,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-        private void getAction(String user_id){
-
-        retrofitAPI.getActions(user_id).enqueue(new Callback<Action>(){
-
+    private void getAction(String user_id) {
+        retrofitAPI.getActions(user_id).enqueue(new Callback<Action>() {
             @Override
             public void onResponse(Call<Action> call, Response<Action> response) {
                 if (response.isSuccessful()) {
@@ -175,11 +203,12 @@ public class MainActivity extends AppCompatActivity {
                         List<ActionList> actions = message.getActions();
                         String action1 = actions.get(0).getActionBody();
                         String action2 = actions.get(1).getActionBody();
-                        Log.d("액션들",action1);
-                    } else{
+                        txt_action1.setText(action1);
+                        txt_action2.setText(action2);
+                        Log.d("액션들", action1);
+                    } else {
                         Log.d("액션없음", message.toString());
                     }
-
                 }
             }
 
@@ -188,13 +217,11 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("액션리스폰실패", t.toString());
             }
         });
+
+        SharedPreferences actionSP = getSharedPreferences("action", MODE_PRIVATE);
+        SharedPreferences.Editor editor = actionSP.edit();
+        editor.putString("action1", (String) txt_action1.getText());
+        editor.putString("action2", (String) txt_action2.getText());
+        editor.commit();
     }
-
-
-
-    /**
-     * A native method that is implemented by the 'hovi_android' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI();
 }

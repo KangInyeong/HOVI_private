@@ -30,7 +30,7 @@ public class ReviseActivity extends AppCompatActivity {
         EditText edit_action2 = (EditText) findViewById(R.id.edit_action2);
         Button save_action = (Button) findViewById(R.id.btn_save);
 
-        Button more_action = (Button) findViewById(R.id.btn_more);
+        Button more_action = (Button) findViewById(R.id.btn_more); //todo 액션 추가
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://15.164.218.200:8080/")
@@ -110,8 +110,13 @@ public class ReviseActivity extends AppCompatActivity {
                     });
 
                     Intent intent = new Intent(ReviseActivity.this, EyeActivity.class);
-                    intent.putExtra("action1",action1);
-                    intent.putExtra("action2",action2);
+                    SharedPreferences actionSP = getSharedPreferences("action", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = actionSP.edit();
+                    editor.putString("action1", action1);
+                    editor.putString("action2", action2);
+                    editor.commit();
+//                    intent.putExtra("action1",action1);
+//                    intent.putExtra("action2",action2);
                     startActivity(intent);
                     finish();
 

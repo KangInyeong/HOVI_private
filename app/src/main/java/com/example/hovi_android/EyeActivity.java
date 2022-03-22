@@ -64,7 +64,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class EyeActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
     private TextToSpeech tts;
-    private Button speak_out;
 //    private TextView input_text;
 
     //비전
@@ -81,10 +80,12 @@ public class EyeActivity extends AppCompatActivity implements TextToSpeech.OnIni
 
     private boolean mIsFrontFacing = true;
 
-//    private Timer timeCall;
-//    private int nCnt;
+    private ProgressBar progressBar;
+    private Timer timeCall;
+    private int nCnt;
 
     RetrofitAPI retrofitAPI;
+    String action1, action2;
     TextView txt_action1, txt_action2;
 
     public static Context mContext;
@@ -95,36 +96,25 @@ public class EyeActivity extends AppCompatActivity implements TextToSpeech.OnIni
         setContentView(R.layout.activity_eye);
         mContext = this;
 
-//        ProgressBar progressBar = findViewById(R.id.progressBar);
-//        progressBar.setIndeterminate(false);
+        progressBar = findViewById(R.id.progressBar);
+        progressBar.setIndeterminate(false);
 
-        //눈감기 감지하면 타이머 작동 5초완료 시 확인.
-//
-//        nCnt = 0;
-//
-//        TimerTask timerTask = new TimerTask() {
-//            @Override
-//            public void run() {
-//                work();
-//                progressBar.setProgress(nCnt * 20);
-//            }
-//        };
-//
-//        timeCall = new Timer();
-//        timeCall.schedule(timerTask,0,1000);
+        //todo 눈 감기 시 타이머 작동
+        nCnt = 0;
+
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                work();
+                progressBar.setProgress(nCnt);
+            }
+        };
+
+        timeCall = new Timer();
+        timeCall.schedule(timerTask,0,1000);
 
 
         tts = new TextToSpeech(this, this);
-        speak_out = findViewById(R.id.button);
-
-        speak_out.setOnClickListener(new View.OnClickListener(){
-            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP) // LOLLIPOP이상 버전에서만 실행 가능
-            @Override
-            public void onClick(View v){
-//                Log.e("tts","안녕");
-                rspeakOut();
-            }
-        });
 
         txt_action1 = findViewById(R.id.action1);
         txt_action2 = findViewById(R.id.action2);
@@ -136,8 +126,11 @@ public class EyeActivity extends AppCompatActivity implements TextToSpeech.OnIni
         retrofitAPI = retrofit.create(RetrofitAPI.class);
 
         Intent intent = getIntent();
-        String action1 = intent.getStringExtra("action1");
-        String action2 = intent.getStringExtra("action2");
+//        action1 = intent.getStringExtra("action1");
+//        action2 = intent.getStringExtra("action2");
+        SharedPreferences actionSP = getSharedPreferences("action", MODE_PRIVATE);
+        txt_action1.setText(actionSP.getString("action1",""));
+        txt_action2.setText(actionSP.getString("action2",""));
 
         if(action1 != null && action2 != null && action1 != "" && action2 != "") {
             txt_action1.setText(action1);
@@ -166,38 +159,48 @@ public class EyeActivity extends AppCompatActivity implements TextToSpeech.OnIni
 
     }
 
-//    private void work(){
-//        Log.d("타이머", nCnt+"work");
-//        if(nCnt >= 5){
-//            timeCall.cancel();
-//        }
-//        nCnt++;
-//    }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        Intent intent = new Intent(this, MainActivity.class); //지금 액티비티에서 다른 액티비티로 이동하는 인텐트 설정
+//        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //인텐트 플래그 설정 -> 더 알아보기
+        startActivity(intent);  //인텐트 이동
+        finish();   //현재 액티비티 종료
+    }
+
+    private void work(){
+        Log.d("타이머", nCnt+"work");
+        if(nCnt >= 5){
+            timeCall.cancel();
+        }
+        nCnt++;
+    }
 
     Handler handler = new Handler(Looper.getMainLooper());
 
     public void dorightAction(){
-        Log.e("10번오른쪽눈","555555555");
+        Log.e("오른쪽눈","액션");
         rspeakOut();
 
         handler.postDelayed(new Runnable() {
             @Override
             public void run()
             {
-                Toast.makeText(EyeActivity.this, "오른쪽눈감았어!!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EyeActivity.this, txt_action1.getText(), Toast.LENGTH_SHORT).show();
             }
         }, 0);
     }
 
     public void doleftAction(){
-        Log.e("10번왼른쪽눈","555555555");
+        Log.e("왼른쪽눈","액션");
         lspeakOut();
 
         handler.postDelayed(new Runnable() {
             @Override
             public void run()
             {
-                Toast.makeText(EyeActivity.this, "왼쪽눈감았어!!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EyeActivity.this, txt_action2.getText(), Toast.LENGTH_SHORT).show();
             }
         }, 0);
     }
@@ -269,9 +272,8 @@ public class EyeActivity extends AppCompatActivity implements TextToSpeech.OnIni
             if(result == TextToSpeech.LANG_NOT_SUPPORTED || result == TextToSpeech.LANG_MISSING_DATA){
                 Log.e("TTS", "This Language is not supported");
             }else{
-                speak_out.setEnabled(true);
-//                rspeakOut();// onInit에 음성출력할 텍스트를 넣어줌
-//                lspeakOut();
+                txt_action1.setEnabled(true);
+                txt_action2.setEnabled(true);
             }
         }else{
             Log.e("TTS", "Initialization Failed!");
