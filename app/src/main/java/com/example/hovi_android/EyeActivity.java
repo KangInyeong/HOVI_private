@@ -80,9 +80,9 @@ public class EyeActivity extends AppCompatActivity implements TextToSpeech.OnIni
 
     private boolean mIsFrontFacing = true;
 
-    private ProgressBar progressBar;
-    private Timer timeCall;
-    private int nCnt;
+//    private ProgressBar progressBar;
+//    private Timer timeCall;
+//    private int nCnt;
 
     RetrofitAPI retrofitAPI;
     String action1, action2;
@@ -96,22 +96,22 @@ public class EyeActivity extends AppCompatActivity implements TextToSpeech.OnIni
         setContentView(R.layout.activity_eye);
         mContext = this;
 
-        progressBar = findViewById(R.id.progressBar);
-        progressBar.setIndeterminate(false);
-
         //todo 눈 감기 시 타이머 작동
-        nCnt = 0;
-
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                work();
-                progressBar.setProgress(nCnt);
-            }
-        };
-
-        timeCall = new Timer();
-        timeCall.schedule(timerTask,0,1000);
+//        progressBar = findViewById(R.id.progressBar);
+//        progressBar.setIndeterminate(false);
+//
+//        nCnt = 0;
+//
+//        TimerTask timerTask = new TimerTask() {
+//            @Override
+//            public void run() {
+//                work();
+//                progressBar.setProgress(nCnt);
+//            }
+//        };
+//
+//        timeCall = new Timer();
+//        timeCall.schedule(timerTask,0,1000);
 
 
         tts = new TextToSpeech(this, this);
@@ -169,13 +169,13 @@ public class EyeActivity extends AppCompatActivity implements TextToSpeech.OnIni
         finish();   //현재 액티비티 종료
     }
 
-    private void work(){
-        Log.d("타이머", nCnt+"work");
-        if(nCnt >= 5){
-            timeCall.cancel();
-        }
-        nCnt++;
-    }
+//    private void work(){
+//        Log.d("타이머", nCnt+"work");
+//        if(nCnt >= 5){
+//            timeCall.cancel();
+//        }
+//        nCnt++;
+//    }
 
     Handler handler = new Handler(Looper.getMainLooper());
 

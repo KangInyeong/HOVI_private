@@ -56,7 +56,7 @@ class EyesGraphics extends GraphicOverlay.Graphic {
         super(overlay);
 
         paint = new Paint(); //추가
-        paint.setColor(Color.GREEN);
+        paint.setColor(Color.TRANSPARENT); //원래 GREEN
         paint.setStyle(Paint.Style.FILL);
 
         //
@@ -66,7 +66,7 @@ class EyesGraphics extends GraphicOverlay.Graphic {
 
         //눈꺼풀
         mEyeLidPaint = new Paint();
-        mEyeLidPaint.setColor(Color.YELLOW);
+        mEyeLidPaint.setColor(Color.TRANSPARENT);//원래 YELLOW
         mEyeLidPaint.setStyle(Paint.Style.FILL);
 
         //홍채
