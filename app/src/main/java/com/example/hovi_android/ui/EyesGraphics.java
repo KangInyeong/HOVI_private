@@ -71,7 +71,7 @@ class EyesGraphics extends GraphicOverlay.Graphic {
 
         //홍채
         mEyeIrisPaint = new Paint();
-        mEyeIrisPaint.setColor(Color.RED);
+        mEyeIrisPaint.setColor(Color.TRANSPARENT); //원래 RED
         mEyeIrisPaint.setStyle(Paint.Style.STROKE);
         mEyeIrisPaint.setStrokeWidth(2);
 

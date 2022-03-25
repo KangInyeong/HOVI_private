@@ -56,7 +56,7 @@ public class ReviseActivity extends AppCompatActivity {
                     //액션1과 액션2 넘기기
                     action1 = getEdit1;
                     action2 = getEdit2;
-                    Toast.makeText(getBaseContext(), "Action1 :" + action1 + "Action2 :" + action2, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), "Action1 : " + action1 + "  Action2 : " + action2, Toast.LENGTH_SHORT).show();
 
                     SharedPreferences sharedPreferences= getSharedPreferences("user", MODE_PRIVATE);
                     String save_user = sharedPreferences.getString("userId","");
